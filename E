@@ -1,0 +1,99 @@
+import re
+from abc import ABC, abstractmethod
+
+class SoftwareFJError(Exception):
+    pass
+
+class ParametroFaltanteError(SoftwareFJError):
+    pass
+
+class ClienteInvalidoError(SoftwareFJError):
+    pass
+
+class Entidad(ABC):
+    contador = 0
+    def __init__(self):
+        Entidad.contador += 1
+        self._id = Entidad.contador
+    @property
+    def id(self):
+        return self._id
+    @abstractmethod
+    def describir(self):
+        pass
+
+class Cliente(Entidad):
+
+    def __init__(self, nombre, documento, correo, telefono):
+        self.__nombre = self._validar_nombre(nombre)
+        self.__documento = self._validar_documento(documento)
+        self.__correo = self._validar_correo(correo)
+        self.__telefono = self._validar_telefono(telefono)
+
+        super().__init__()
+    @staticmethod
+    def _obligatorio(valor, campo):
+        if valor is None or str(valor).strip() == "":
+            raise ParametroFaltanteError(
+                f"El campo {campo} es obligatorio."
+            )
+        return str(valor).strip()
+    @classmethod
+    def _validar_nombre(cls, valor):
+        valor = cls._obligatorio(valor, "nombre")
+
+        if len(valor) < 3 or not re.fullmatch(
+            r"[A-Za-zÁÉÍÓÚáéíóúÑñ ]+", valor
+        ):
+            raise ClienteInvalidoError("El nombre no es valido.")
+        return valor
+    @classmethod
+    def _validar_documento(cls, valor):
+        valor = cls._obligatorio(valor, "documento")
+
+        if not re.fullmatch(r"\d{5,12}", valor):
+            raise ClienteInvalidoError(
+                "El documento debe tener entre 5 y 12 numeros."
+            )
+
+        return valor
+    @classmethod
+    def _validar_correo(cls, valor):
+        valor = cls._obligatorio(valor, "correo")
+        if not re.fullmatch(
+          r"[\w.+-]+@[\w-]+(\.[\w-]+)+", valor
+        ):
+            raise ClienteInvalidoError(
+                "El correo no tiene un formato valido."
+            )
+        return valor
+    @classmethod
+    def _validar_telefono(cls, valor):
+        valor = cls._obligatorio(valor, "telefono")
+
+        if not re.fullmatch(r"\d{7,10}", valor):
+            raise ClienteInvalidoError(
+                "El telefono debe tener entre 7 y 10 numeros."
+            )
+
+        return valor
+    @property
+    def nombre(self):
+        return self.__nombre
+    @property
+    def documento(self):
+        return self.__documento
+    @property
+    def correo(self):
+        return self.__correo
+    @correo.setter
+    def correo(self, nuevo_correo):
+        self.__correo = self._validar_correo(nuevo_correo)
+    @property
+    def telefono(self):
+        return self.__telefono
+    @telefono.setter
+    def telefono(self, nuevo_telefono):
+        self.__telefono = self._validar_telefono(nuevo_telefono)
+    def describir(self):
+        return 
